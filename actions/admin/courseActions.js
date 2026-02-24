@@ -52,7 +52,7 @@ export async function createCourse(data) {
   revalidatePath("/admin/courses");
   return { success: true };
 }
-
+// 
 export async function toggleCoursePublish(courseId, currentStatus) {
   const user = await checkUser();
   if (!user || user.role !== "ADMIN") throw new Error("Unauthorized");
