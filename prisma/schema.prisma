@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  role      Role     @default(STUDENT)
+  firstName String?
+  lastName  String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  payments  Payment[]
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Float
+  batches     Batch[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Batch {
+  id        String   @id @default(cuid())
+  name      String
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lesson {
+  id         String   @id @default(cuid())
+  title      String
+  playbackId String?
+  batchId    String
+  batch      Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  transactionId String   @unique
+  amount        Float
+  status        String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
