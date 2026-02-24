@@ -13,47 +13,181 @@ enum Role {
   ADMIN
 }
 
+enum ContentType {
+  VIDEO
+  PDF
+  ARTICLE
+  LINK
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  role      Role     @default(STUDENT)
-  firstName String?
-  lastName  String?
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  payments  Payment[]
+  id             String          @id @default(cuid())
+  clerkId        String          @unique
+  email          String          @unique
+  role           Role            @default(STUDENT)
+  firstName      String?
+  lastName       String?
+  phone          String?
+  imageUrl       String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  enrollments    Enrollment[]
+  payments       Payment[]
+  lessonsTaught  Lesson[]        @relation("TeacherLessons")
+  materials      StudyMaterial[] @relation("TeacherMaterials")
+  watchProgress  WatchProgress[]
+  doubtsAsked    Doubt[]         @relation("StudentDoubts")
+  doubtsAnswered DoubtReply[]    @relation("TeacherReplies")
+  teacherBatches TeacherBatch[]
 }
 
 model Course {
+  id              String       @id @default(cuid())
+  slug            String       @unique
+  name            String
+  category        String
+  courseType      String?      
+  isFree          Boolean      @default(false)
+  isStandalone    Boolean      @default(false)
+  expiryDate      DateTime?    
+  fee             Float
+  description     String
+  fullDescription String
+  curriculum      Json
+  features        Json
+  schedule        String
+  eligibility     String
+  isPublished     Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  batches         Batch[]
+  payments        Payment[]
+}
+
+model Batch {
+  id             String          @id @default(cuid())
+  name           String
+  courseId       String
+  course         Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  maxStudents    Int             @default(100)
+  language       String          @default("Hinglish")
+  timeSlot       String?
+  days           String?
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  enrollments    Enrollment[]
+  lessons        Lesson[]
+  materials      StudyMaterial[]
+  notices        Notice[]
+  liveClasses    LiveClass[]
+  teacherBatches TeacherBatch[]
+}
+
+model TeacherBatch {
+  id        String   @id @default(cuid())
+  userId    String
+  batchId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, batchId])
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  batchId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batch     Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  accessEnd DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, batchId])
+}
+
+model Subject {
+  id        String          @id @default(cuid())
+  name      String          @unique
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  lessons   Lesson[]
+  materials StudyMaterial[]
+}
+
+model Lesson {
+  id            String          @id @default(cuid())
+  title         String
+  description   String?
+  playbackId    String?
+  duration      Int?
+  isFreePreview Boolean         @default(false)
+  batchId       String
+  batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       Subject         @relation(fields: [subjectId], references: [id])
+  teacherId     String
+  teacher       User            @relation("TeacherLessons", fields: [teacherId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  watchProgress WatchProgress[]
+  doubts        Doubt[]
+}
+
+model StudyMaterial {
+  id            String     @id @default(cuid())
+  title         String
+  description   String?
+  type          ContentType
+  fileUrl       String
+  size          String?
+  pages         Int?
+  difficulty    Difficulty @default(INTERMEDIATE)
+  isFreePreview Boolean    @default(false)
+  downloads     Int        @default(0)
+  batchId       String?
+  batch         Batch?     @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       Subject    @relation(fields: [subjectId], references: [id])
+  teacherId     String
+  teacher       User       @relation("TeacherMaterials", fields: [teacherId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model LiveClass {
   id          String   @id @default(cuid())
   title       String
-  description String
-  price       Float
-  batches     Batch[]
+  description String?
+  meetingLink String
+  startTime   DateTime
+  duration    Int
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model Batch {
+model Notice {
   id        String   @id @default(cuid())
-  name      String
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons   Lesson[]
+  title     String
+  content   String
+  batchId   String?
+  batch     Batch?   @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  isGlobal  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Lesson {
-  id         String   @id @default(cuid())
-  title      String
-  playbackId String?
-  batchId    String
-  batch      Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
 }
 
 model Payment {
@@ -63,6 +197,57 @@ model Payment {
   status        String
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model Result {
+  id        String   @id @default(cuid())
+  name      String
+  exam      String
+  rank      String
+  marks     String
+  year      String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WatchProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  watchedSecs Int      @default(0)
+  isCompleted Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+}
+
+model Doubt {
+  id        String       @id @default(cuid())
+  question  String
+  userId    String
+  user      User         @relation("StudentDoubts", fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  isResolved Boolean     @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  replies   DoubtReply[]
+}
+
+model DoubtReply {
+  id        String   @id @default(cuid())
+  answer    String
+  doubtId   String
+  doubt     Doubt    @relation(fields: [doubtId], references: [id], onDelete: Cascade)
+  teacherId String
+  teacher   User     @relation("TeacherReplies", fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
