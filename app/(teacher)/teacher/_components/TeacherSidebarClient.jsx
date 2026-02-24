@@ -25,7 +25,8 @@ export default function TeacherSidebarClient() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 border-r border-white/10 bg-black/40 backdrop-blur-xl h-[calc(100vh-4rem)] sticky top-16">
+    // always show sidebar and stretch from top (below header) to bottom
+    <aside className="flex flex-col w-64 border-r border-white/10 bg-black/40 backdrop-blur-xl sticky top-16 bottom-0">
       <div className="flex-1 py-8 px-4 flex flex-col gap-2">
         {menuItems.map((item) => {
           const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/teacher");

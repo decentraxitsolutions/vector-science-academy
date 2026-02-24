@@ -21,14 +21,15 @@ export default function HeaderClient({ dbUser }) {
   const isAdminOrTeacher = dbUser?.role === 'ADMIN' || dbUser?.role === 'TEACHER';
   const isActive = (path) => pathname === path;
 
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/teacher')) {
-    return null; 
-  }
+  // Always render the header even on admin/teacher routes.  We want a consistent
+  // top bar across the entire app.  The `console` button and different navItems
+  // will already adapt based on the user's role below.
 
   const navItems = isAdminOrTeacher 
     ? [
         { name: "Home", href: "/" },
         { name: "Courses", href: "/courses" },
+        // teachers/admins still see a link back to their dashboard
         { name: "Dashboard", href: dbUser?.role === 'ADMIN' ? "/admin" : "/teacher" },
       ]
     : [
@@ -38,7 +39,6 @@ export default function HeaderClient({ dbUser }) {
         { name: "Our Results", href: "/results" },
         { name: "About", href: "/about" },
         { name: "My Learning", href: "/portal" },
-        
       ];
 
   return (
