@@ -2,12 +2,21 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
-  '/sign-up(.*)'
+  '/sign-up(.*)',
+  '/'
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  // wrap protect call to avoid blowing up the entire site if Clerk is misconfigured
   if (!isPublicRoute(req)) {
-    await auth.protect()
+    try {
+      await auth.protect();
+    } catch (err) {
+      // log error server-side (Vercel will capture console.error output)
+      console.error("Clerk middleware protection failed", err);
+      // don't rethrow; let the request continue so that our layout/page-level
+      // guards can handle unauthorized users instead of crashing the app.
+    }
   }
 })
 

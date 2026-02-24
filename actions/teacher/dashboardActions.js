@@ -2,10 +2,14 @@
 
 import { db } from "@/lib/prisma";
 import { checkUser } from "@/lib/checkUser";
+import { redirect } from "next/navigation";
 
 export async function getTeacherDashboardStats() {
   const user = await checkUser();
-  if (!user || user.role !== "TEACHER") throw new Error("Unauthorized");
+  
+  if (!user || user.role !== "TEACHER") {
+    redirect("/");
+  }
 
   // Fetch the teacher's assigned batches
   const teacherBatches = await db.teacherBatch.findMany({
