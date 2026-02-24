@@ -9,15 +9,10 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function AdminBatchesPage() {
-  try {
-    const [batches, courses] = await Promise.all([
-      getAdminBatches(),
-      getCoursesForDropdown()
-    ]);
+  const [batches, courses] = await Promise.all([
+    getAdminBatches(),
+    getCoursesForDropdown()
+  ]);
 
-    return <AdminBatchesClient initialBatches={batches} courses={courses} />;
-  } catch (err) {
-    // if the user is not authenticated/authorized, send them to sign in
-    redirect("/sign-in");
-  }
+  return <AdminBatchesClient initialBatches={batches} courses={courses} />;
 }

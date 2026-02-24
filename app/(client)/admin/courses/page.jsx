@@ -5,10 +5,6 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function AdminCoursesPage() {
-  try {
-    const courses = await getAdminCourses();
-    return <AdminCoursesClient courses={courses} />;
-  } catch (err) {
-    redirect("/sign-in");
-  }
+  const courses = await getAdminCourses();
+  return <AdminCoursesClient courses={courses} />;
 }

@@ -7,7 +7,13 @@ export const dynamic = "force-dynamic";
 export default async function AdminLayout({ children }) {
   const user = await checkUser();
 
-  if (!user || user.role !== "ADMIN") {
+  // unauthenticated users go to sign-in (Clerk will send them back)
+  if (!user) {
+    redirect(`/sign-in?redirect_url=${encodeURIComponent("/admin")}`);
+  }
+
+  // authenticated but not an admin should not stay here
+  if (user.role !== "ADMIN") {
     redirect("/");
   }
 

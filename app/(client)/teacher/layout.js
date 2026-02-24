@@ -7,7 +7,11 @@ export const dynamic = "force-dynamic";
 export default async function TeacherLayout({ children }) {
   const user = await checkUser();
 
-  if (!user || user.role !== "TEACHER") {
+  if (!user) {
+    redirect(`/sign-in?redirect_url=${encodeURIComponent("/teacher")}`);
+  }
+
+  if (user.role !== "TEACHER") {
     redirect("/");
   }
 
