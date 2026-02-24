@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { checkUser } from "@/lib/checkUser";
 import { PlayCircle, Award, Clock } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentPortal() {
   const user = await checkUser();
 

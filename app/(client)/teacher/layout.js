@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { checkUser } from "@/lib/checkUser";
 import TeacherSidebarClient from "./_components/TeacherSidebarClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function TeacherLayout({ children }) {
   const user = await checkUser();
 

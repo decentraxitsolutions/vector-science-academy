@@ -3,6 +3,8 @@ import FeaturesClient from '@/components/HomeComponents/FeaturesClient';
 import StatsClient from '@/components/HomeComponents/StatsClient';
 import { checkUser } from "@/lib/checkUser";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const user = await checkUser();
   

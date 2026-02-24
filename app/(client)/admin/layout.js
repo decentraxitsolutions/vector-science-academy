@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { checkUser } from "@/lib/checkUser";
 import AdminSidebarClient from "./_components/AdminSidebarClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({ children }) {
   const user = await checkUser();
 
